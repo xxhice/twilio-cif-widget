@@ -1,0 +1,16 @@
+export enum Strings {
+  PROVIDER_NAME = 'CIF API Runner',
+  API_HINT_TEXT = 'Select a set of APIs and press run!',
+  EVENT_HANDLER_HINT_TEXT = 'Listeners running... Trigger in Dynamics!',
+  LISTENING_TEXT = 'Listening',
+  DRAWER_DETAILS_HEADER_TEXT = "Details",
+  DRAWER_CONFIGURATION_HEADER_TEXT = "Settings",
+  DARK_MODE = "Dark Mode",
+  LIGHT_MODE = "Light Mode",
+  NOTIFICATION_TEMPLATE = "Notification Template",
+  TAB_TEMPLATE = "Tab Template",
+  SESSION_TEMPLATE = "Session Template",
+  EMPTY_DRAWER = "Nothing to see here yet!",
+  SETTING_UP_PROVIDER = "Setting up provider",
+  QUEUED = "Queued",
+}

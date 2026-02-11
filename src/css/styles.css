@@ -1,0 +1,19 @@
+@keyframes dots {
+  0%,
+  20% {
+    content: '.';
+  } /* One dot */
+  40%,
+  60% {
+    content: '..';
+  } /* Two dots */
+  80%,
+  100% {
+    content: '...';
+  } /* Three dots */
+}
+
+.dots::after {
+  content: '';
+  animation: dots 1.5s linear infinite;
+}
