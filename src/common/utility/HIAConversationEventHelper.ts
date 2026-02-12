@@ -4,15 +4,11 @@
  */
 
 import {
-  HIAConversationEvent,
   HIAConversationEventHandler,
   HIAConversationEventNames,
   IConversationLoadEvent,
   ICustomerMessageReceivedEvent,
-  IIntentSuggestionReadyMessage,
-  isConversationLoadEvent,
-  isCustomerMessageReceivedEvent,
-  isIntentSuggestionReadyMessage,
+  IIntentSuggestionReadyMessage
 } from "../../interfaces/IHIAConversationEvents";
 
 import { CIFV2 } from "../../cif/CIFV2";
@@ -60,7 +56,7 @@ export class HIAConversationEventHelper {
 
     return await CIFV2.getInstance().raiseEvent(
       event.eventName,
-      JSON.stringify(event)
+      JSON.stringify(event.eventData)
     );
   }
 
@@ -87,7 +83,7 @@ export class HIAConversationEventHelper {
 
     return await CIFV2.getInstance().raiseEvent(
       event.eventName,
-      JSON.stringify(event)
+      JSON.stringify(event.eventData)
     );
   }
 
@@ -96,26 +92,27 @@ export class HIAConversationEventHelper {
    */
   private static async handleConversationLoad(eventData: string): Promise<void> {
     try {
-      const event = JSON.parse(eventData);
+      const data = JSON.parse(eventData);
 
-      if (!isConversationLoadEvent(event)) {
-        console.error("Invalid conversation load event data", event);
+      // Validate the data has required fields
+      if (!data.conversationId || !data.intentFamilyId) {
+        console.error("Invalid conversation load event data", data);
         return;
       }
 
       console.log(
-        `[HIA] Conversation loaded: ${event.eventData.conversationId}`,
-        event.eventData
+        `[HIA] Conversation loaded: ${data.conversationId}`,
+        data
       );
 
       // Cache conversation data to prevent duplicate processing
-      const { conversationId } = event.eventData;
+      const { conversationId } = data;
       if (this.conversationCache.has(conversationId)) {
         console.log(`[HIA] Conversation ${conversationId} already loaded (cached)`);
         return;
       }
 
-      this.conversationCache.set(conversationId, event.eventData);
+      this.conversationCache.set(conversationId, data);
 
       // Execute registered custom handlers
       const handlers = this.handlers.get(HIAConversationEventNames.CONVERSATION_LOAD) || [];
@@ -132,16 +129,17 @@ export class HIAConversationEventHelper {
    */
   private static async handleCustomerMessageReceived(eventData: string): Promise<void> {
     try {
-      const event = JSON.parse(eventData);
+      const data = JSON.parse(eventData);
 
-      if (!isCustomerMessageReceivedEvent(event)) {
-        console.error("Invalid customer message received event data", event);
+      // Validate the data has required fields
+      if (!data.conversationId || !data.messageId) {
+        console.error("Invalid customer message received event data", data);
         return;
       }
 
       console.log(
-        `[HIA] Customer message received in conversation: ${event.eventData.conversationId}`,
-        event.eventData
+        `[HIA] Customer message received in conversation: ${data.conversationId}`,
+        data
       );
 
       // Execute registered custom handlers
