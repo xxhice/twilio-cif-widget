@@ -3,7 +3,6 @@
  * @see docs/HIA_CONVERSATION_EVENTS.md for full documentation
  */
 
-import { CIFV2 } from "../../cif/CIFV2";
 import {
   HIAConversationEvent,
   HIAConversationEventHandler,
@@ -15,6 +14,8 @@ import {
   isCustomerMessageReceivedEvent,
   isIntentSuggestionReadyMessage,
 } from "../../interfaces/IHIAConversationEvents";
+
+import { CIFV2 } from "../../cif/CIFV2";
 
 /**
  * Helper class for managing HIA conversation events
@@ -37,38 +38,6 @@ export class HIAConversationEventHelper {
       HIAConversationEventNames.CUSTOMER_MESSAGE_RECEIVED,
       this.handleCustomerMessageReceived.bind(this)
     );
-  }
-
-  /**
-   * Adds a custom handler for conversation load events
-   * @param handler - The handler function to execute
-   */
-  static onConversationLoad(handler: (event: IConversationLoadEvent) => Promise<void>): void {
-    const eventName = HIAConversationEventNames.CONVERSATION_LOAD;
-    if (!this.handlers.has(eventName)) {
-      this.handlers.set(eventName, []);
-    }
-    this.handlers.get(eventName)!.push(async (eventData: string) => {
-      const event = JSON.parse(eventData) as IConversationLoadEvent;
-      await handler(event);
-    });
-  }
-
-  /**
-   * Adds a custom handler for customer message received events
-   * @param handler - The handler function to execute
-   */
-  static onCustomerMessageReceived(
-    handler: (event: ICustomerMessageReceivedEvent) => Promise<void>
-  ): void {
-    const eventName = HIAConversationEventNames.CUSTOMER_MESSAGE_RECEIVED;
-    if (!this.handlers.has(eventName)) {
-      this.handlers.set(eventName, []);
-    }
-    this.handlers.get(eventName)!.push(async (eventData: string) => {
-      const event = JSON.parse(eventData) as ICustomerMessageReceivedEvent;
-      await handler(event);
-    });
   }
 
   /**

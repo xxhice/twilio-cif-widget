@@ -1,12 +1,11 @@
-
 import { CIFV2 } from "../cif/CIFV2";
 import { GlobalStore } from "../common/GlobalStore/GlobalStore";
 import { GlobalStoreParameters } from "../common/GlobalStore/GlobalStoreParameters";
-import { Utils } from "../common/utility/Utils";
-import { LocalStorageConstants } from "../constants/LocalStorageConstants";
 import { IApplicationTabTemplate } from "../interfaces/IApplicationTabTemplate";
 import { INotificationTemplate } from "../interfaces/INotificationTemplate";
 import { ISessionTemplate } from "../interfaces/ISessionTemplate";
+import { LocalStorageConstants } from "../constants/LocalStorageConstants";
+import { Utils } from "../common/utility/Utils";
 
 export class Bootstrapper {
   private static instance: Bootstrapper;
@@ -25,8 +24,11 @@ export class Bootstrapper {
     await this.loadApplicationTemplates();
     await this.loadNotificationTemplates();
 
-    // start provider
-    this.launchProvider();
+    // Don't auto-launch provider on bootstrap
+    // Notifications should only be triggered when agent is added to a conversation
+    // (handled by conversationJoined event in TwilioAgentPanel)
+        // start provider
+    //this.launchProvider();
   }
 
   async loadSessionTemplates() {
