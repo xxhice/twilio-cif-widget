@@ -118,6 +118,52 @@
       color: #d32f2f;
       background: none;
     }
+    .debug-link {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 11px;
+      color: #ccc;
+      cursor: pointer;
+      text-decoration: underline;
+      z-index: 100;
+    }
+    .debug-link:hover {
+      color: #0066cc;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .conversation-item {
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      background: white;
+    }
+    .conversation-item:hover {
+      background: #f5f5f5;
+    }
     .info {
       background: #e3f2fd;
       padding: 12px;
@@ -179,6 +225,18 @@
         <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
         <button onclick="sendMessage()">Send</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Debug link for testing -->
+  <div class="debug-link" onclick="showConversationDashboard()">🔧 Debug: My Conversations</div>
+
+  <!-- Dashboard Modal -->
+  <div id="dashboardModal" class="modal-overlay" style="display: none;">
+    <div class="modal" onclick="event.stopPropagation()">
+      <h3>My Conversations</h3>
+      <div id="conversationList"></div>
+      <button onclick="closeDashboard()" style="margin-top: 16px;">Close</button>
     </div>
   </div>
 
@@ -450,16 +508,24 @@
         }
 
         // Reset UI
-        document.getElementById('chatScreen').classList.remove('active');
-        document.getElementById('startScreen').classList.add('active');
-        document.getElementById('startScreen').innerHTML = `
-          <h2>Conversation Closed</h2>
-          <div style="background: #e8f5e9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
-            <strong>✅ Your conversation has been closed.</strong>
-            <p>Thank you for contacting support!</p>
-          </div>
-          <button onclick="location.reload()">Start New Conversation</button>
-        `;
+        const chatScreen = document.getElementById('chatScreen');
+        const startScreen = document.getElementById('startScreen');
+
+        if (chatScreen) {
+          chatScreen.classList.remove('active');
+        }
+
+        if (startScreen) {
+          startScreen.classList.add('active');
+          startScreen.innerHTML = `
+            <h2>Conversation Closed</h2>
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+              <strong>✅ Your conversation has been closed.</strong>
+              <p>Thank you for contacting support!</p>
+            </div>
+            <button onclick="location.reload()">Start New Conversation</button>
+          `;
+        }
 
         conversation = null;
         client = null;
@@ -474,6 +540,84 @@
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    // DEBUG: Show conversation dashboard
+    async function showConversationDashboard() {
+      if (!client) {
+        alert('Not connected. Please wait for initialization.');
+        return;
+      }
+
+      const modal = document.getElementById('dashboardModal');
+      const listDiv = document.getElementById('conversationList');
+
+      listDiv.innerHTML = '<div style="text-align: center; padding: 20px;">Loading conversations...</div>';
+      modal.style.display = 'flex';
+
+      try {
+        const convs = await client.getSubscribedConversations();
+
+        if (convs.items.length === 0) {
+          listDiv.innerHTML = '<p>No conversations found.</p>';
+          return;
+        }
+
+        listDiv.innerHTML = '';
+        convs.items.forEach((conv) => {
+          const item = document.createElement('div');
+          item.className = 'conversation-item';
+          item.innerHTML = `
+            <strong>${conv.friendlyName || 'Untitled Conversation'}</strong><br>
+            <span style="font-size: 11px; color: #999;">${conv.sid}</span>
+          `;
+          item.onclick = () => rejoinConversation(conv);
+          listDiv.appendChild(item);
+        });
+      } catch (error) {
+        console.error('Error loading conversations:', error);
+        listDiv.innerHTML = '<p style="color: red;">Error loading conversations</p>';
+      }
+    }
+
+    function closeDashboard() {
+      document.getElementById('dashboardModal').style.display = 'none';
+    }
+
+    async function rejoinConversation(conv) {
+      try {
+        closeDashboard();
+
+        // Clear current messages
+        document.getElementById('messages').innerHTML = '';
+
+        // Update conversation reference
+        conversation = conv;
+
+        // Load participant names
+        await loadParticipantNames();
+
+        // Update UI
+        const attrs = conv.attributes
+          ? (typeof conv.attributes === 'string' ? JSON.parse(conv.attributes) : conv.attributes)
+          : {};
+        document.getElementById('displayName').textContent = attrs.customerName || 'Customer';
+        document.getElementById('displayEmail').textContent = attrs.customerEmail || 'N/A';
+        document.getElementById('displayConvSid').textContent = conv.sid;
+
+        // Load message history
+        const messages = await conv.getMessages();
+        messages.items.forEach(displayMessage);
+
+        // Set up listener for new messages
+        conv.removeAllListeners('messageAdded');
+        conv.on('messageAdded', displayMessage);
+
+        console.log('✅ Rejoined conversation:', conv.sid);
+      } catch (error) {
+        console.error('Error rejoining conversation:', error);
+        alert('Error rejoining conversation: ' + error.message);
+      }
     }
 
     // AUTO-START FOR TESTING - Automatically connect as demo user

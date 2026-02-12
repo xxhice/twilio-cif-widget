@@ -24,11 +24,8 @@ export class Bootstrapper {
     await this.loadApplicationTemplates();
     await this.loadNotificationTemplates();
 
-    // Don't auto-launch provider on bootstrap
-    // Notifications should only be triggered when agent is added to a conversation
-    // (handled by conversationJoined event in TwilioAgentPanel)
-        // start provider
-    //this.launchProvider();
+    // start provider
+    this.launchProvider();
   }
 
   async loadSessionTemplates() {
@@ -127,4 +124,22 @@ export class Bootstrapper {
       await CIFV2.getInstance().createSession(sessionTemplate.uniqueName, correlationId);
     }
   }
+/*
+  async launchProvider() {
+    if (!Utils.isCIFAvailable()) {
+      return;
+    }
+
+    // Create a session directly without notification to load the agent panel
+    const sessionTemplate = GlobalStore.getInstance().get(GlobalStoreParameters.SESSION_TEMPLATE) as ISessionTemplate;
+    const correlationId = Utils.generateUUID();
+
+    console.log('[Bootstrapper] Creating session to load agent panel...');
+    await CIFV2.getInstance().createSession(sessionTemplate.uniqueName, correlationId);
+    console.log('[Bootstrapper] Session created - agent panel loaded');
+
+    // Dashboard will auto-open in TwilioAgentPanel if there are existing conversations
+    // Notifications are handled by the conversationJoined event in TwilioAgentPanel
+  }
+    */
 }
