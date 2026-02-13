@@ -106,7 +106,7 @@ export class Bootstrapper {
       console.log("Error while loading application templates", error);
     }
   }
-
+/*
   async launchProvider() {
     if (!Utils.isCIFAvailable()) {
       return;
@@ -124,22 +124,17 @@ export class Bootstrapper {
       await CIFV2.getInstance().createSession(sessionTemplate.uniqueName, correlationId);
     }
   }
-/*
+    */
+
   async launchProvider() {
     if (!Utils.isCIFAvailable()) {
       return;
     }
 
     // Create a session directly without notification to load the agent panel
-    const sessionTemplate = GlobalStore.getInstance().get(GlobalStoreParameters.SESSION_TEMPLATE) as ISessionTemplate;
-    const correlationId = Utils.generateUUID();
+   // const sessionTemplate = GlobalStore.getInstance().get(GlobalStoreParameters.SESSION_TEMPLATE) as ISessionTemplate;
 
-    console.log('[Bootstrapper] Creating session to load agent panel...');
-    await CIFV2.getInstance().createSession(sessionTemplate.uniqueName, correlationId);
-    console.log('[Bootstrapper] Session created - agent panel loaded');
-
-    // Dashboard will auto-open in TwilioAgentPanel if there are existing conversations
-    // Notifications are handled by the conversationJoined event in TwilioAgentPanel
+    await CIFV2.getInstance().createSession("msdyn_3p_session", Utils.generateUUID());
   }
-    */
+
 }

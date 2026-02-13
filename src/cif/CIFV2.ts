@@ -39,14 +39,14 @@ export class CIFV2 {
   * @param correlationId - correlationId for telemetry
   * @returns returns the ID of the session
   */
-  async createSession(templateName: string, correlationId: string) {
+  async createSession(templateName: string, correlationId: string, templateParameters?: Record<string, any>) {
     const input = {
       templateName,
-      templateParameters: {}
+      templateParameters: templateParameters || {}
     };
 
     // returns <string>
-    const sessionId = Microsoft.CIFramework.createSession(input, correlationId);
+    const sessionId = await Microsoft.CIFramework.createSession(input, correlationId);
 
     return sessionId;
   }
@@ -63,7 +63,7 @@ export class CIFV2 {
     };
 
     // returns <string>
-    const tabId = Microsoft.CIFramework.createTab(input, correlationId);
+    const tabId = await Microsoft.CIFramework.createTab(input, correlationId);
 
     return tabId;
   }
@@ -206,5 +206,44 @@ export class CIFV2 {
   async raiseEvent(eventName: string, payload: string): Promise<boolean> {
     const result = await Microsoft.CIFramework.raiseEvent(eventName, payload);
     return result;
+  }
+
+  /* Gets the focused session ID
+   * @returns returns the session ID that is currently focused
+   */
+  async getFocusedSession(): Promise<string | null> {
+    const sessionId = await Microsoft.CIFramework.getFocusedSession();
+    return sessionId;
+  }
+
+  /* Gets session details
+   * @param sessionId - the session ID to get details for
+   * @returns returns session object with sessionId, conversationId, context, isFocused
+   */
+  async getSession(sessionId: string): Promise<any> {
+    const session = await Microsoft.CIFramework.getSession(sessionId);
+    return session;
+  }
+
+  /* Requests focus on a specific session
+   * @param sessionId - the session ID to focus
+   * @param messagesCount - message count (> 0 for auto-switch, 0 for blue dot only)
+   * @param correlationId - correlationId for telemetry
+   * @returns returns the focused session ID
+   */
+  async requestFocusSession(sessionId: string, messagesCount: number = 1, correlationId?: string): Promise<string> {
+    const result = await Microsoft.CIFramework.requestFocusSession(sessionId, messagesCount, correlationId);
+    return result;
+  }
+
+  /* Notifies new activity in a session
+   * @param sessionId - the session ID
+   * @param messagesCount - message count (> 0 for badge, 0 for blue dot only)
+   * @param shouldReset - whether to reset the count
+   * @param correlationId - correlationId for telemetry
+   * @returns returns success status
+   */
+  async notifyNewActivity(sessionId: string, messagesCount: number, shouldReset: boolean, correlationId?: string): Promise<void> {
+    await Microsoft.CIFramework.notifyNewActivity(sessionId, messagesCount, shouldReset, correlationId);
   }
 }
