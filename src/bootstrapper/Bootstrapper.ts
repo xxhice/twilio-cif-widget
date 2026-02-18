@@ -134,7 +134,10 @@ export class Bootstrapper {
     // Create a session directly without notification to load the agent panel
    // const sessionTemplate = GlobalStore.getInstance().get(GlobalStoreParameters.SESSION_TEMPLATE) as ISessionTemplate;
 
-    await CIFV2.getInstance().createSession("msdyn_3p_session", Utils.generateUUID());
+    await CIFV2.getInstance().createSession("msdyn_twilio_dashboard", Utils.generateUUID(),
+                {
+                  title: "Dashboard"
+                });
   }
 
 }

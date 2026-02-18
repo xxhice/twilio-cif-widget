@@ -640,11 +640,17 @@ const TwilioAgentPanel: React.FC = () => {
             if (result.actionName === 'Accept') {
               console.log('[CIF] Agent accepted notification, creating new session...');
 
+              // Get conversation friendly name for the session title
+              const sessionTitle = conv.friendlyName || `Chat - ${customerName}` || 'Customer Support Chat';
+
               // Create a new CIF session with conversation SID as correlation ID
               const sessionId = await CIFV2.getInstance().createSession(
-                "msdyn_3p_session",
-                conv.sid,
-                { conversationId: conv.sid }
+                "msdyn_3p_session", // Session template name
+                conv.sid, // Correlation ID
+                {
+                  conversationId: conv.sid,
+                  title: sessionTitle // Pass title as template parameter
+                }
               );
 
               console.log(`[CIF] Created session ${sessionId} for accepted notification conversation ${conv.sid}`);
@@ -777,10 +783,17 @@ const TwilioAgentPanel: React.FC = () => {
       }
 
       // No existing session - create a new one
+      // Get conversation details for session title
+      const conv = await client.getConversationBySid(conversationSid);
+      const sessionTitle = conv.friendlyName || 'Customer Support Chat';
+
       const sessionId = await CIFV2.getInstance().createSession(
-        "msdyn_3p_session",
-        conversationSid,
-        { conversationId: conversationSid }
+        "msdyn_3p_session", // Session template name
+        conversationSid, // Correlation ID
+        {
+          conversationId: conversationSid,
+          title: sessionTitle // Pass title as template parameter
+        }
       );
 
       console.log(`[CIF] Created new session ${sessionId} for conversation ${conversationSid}`);
