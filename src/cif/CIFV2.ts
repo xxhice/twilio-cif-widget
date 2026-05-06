@@ -246,4 +246,34 @@ export class CIFV2 {
   async notifyNewActivity(sessionId: string, messagesCount: number, shouldReset: boolean, correlationId?: string): Promise<void> {
     await Microsoft.CIFramework.notifyNewActivity(sessionId, messagesCount, shouldReset, correlationId);
   }
+
+  /* Creates a Dynamics record via the CIF bridge (respects agent's security role)
+   * @param entityName - logical name of the entity (e.g. "new_twilioconversation")
+   * @param data - record data object
+   * @returns the created record's id and entityType
+   */
+  async createRecord(entityName: string, data: Record<string, any>): Promise<{ id: string; entityType: string }> {
+    const result = await Microsoft.CIFramework.createRecord(entityName, JSON.stringify(data));
+    return JSON.parse(result);
+  }
+
+  /* Retrieves a Dynamics record via the CIF bridge
+   * @param entityName - logical name of the entity
+   * @param id - record GUID
+   * @param options - OData select/expand options (e.g. "?$select=new_conversationsid")
+   * @returns the record as a parsed object
+   */
+  async retrieveRecord(entityName: string, id: string, options?: string): Promise<Record<string, any>> {
+    const result = await Microsoft.CIFramework.retrieveRecord(entityName, id, options || '');
+    return JSON.parse(result);
+  }
+
+  /* Updates a Dynamics record via the CIF bridge
+   * @param entityName - logical name of the entity
+   * @param id - record GUID
+   * @param data - fields to update
+   */
+  async updateRecord(entityName: string, id: string, data: Record<string, any>): Promise<void> {
+    await Microsoft.CIFramework.updateRecord(entityName, id, JSON.stringify(data));
+  }
 }
