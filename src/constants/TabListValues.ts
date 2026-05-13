@@ -3,4 +3,5 @@ export enum TabListValues {
   EVENTHANDLERS = "eventhandlers",
   HIA_TESTING = "hiatesting",
   TWILIO_AGENT = "twilioagent",
+  TWILIO_VOICE = "twiliovoice",
 }

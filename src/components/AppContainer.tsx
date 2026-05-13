@@ -21,6 +21,7 @@ import EventHandlerTable from './EventHandlerTable';
 import { EventHandlerUniqueNames } from '../constants/EventHandlerUniqueNames';
 import HIATestingPanel from './HIATestingPanel';
 import TwilioAgentPanel from './TwilioAgentPanel';
+import { Button, Spinner } from '@fluentui/react-components';
 import { IApiData } from '../interfaces/IApiData';
 import { IApiExecutionResult } from '../interfaces/IApiExecutionResult';
 import { IApiItem } from '../interfaces/IApiItem';
@@ -34,6 +35,11 @@ import { Strings } from '../constants/Strings';
 import { TabListValues } from '../constants/TabListValues';
 import ToolBar from './ToolBar';
 import { Utils } from '../common/utility/Utils';
+
+// Lazy-loaded so @twilio/voice-sdk and twilio-sync only enter the bundle
+// when the user clicks Voice — they share globals with @twilio/conversations
+// and importing them eagerly corrupts the chat client's internal state.
+const TwilioVoicePanel = React.lazy(() => import('./TwilioVoicePanel'));
 
 interface IAppContainerProps {
   darkMode: boolean;
@@ -288,6 +294,12 @@ const AppContainer = ({ darkMode, onDarkModeToggle }: IAppContainerProps) => {
         return <HIATestingPanel />;
       case TabListValues.TWILIO_AGENT:
         return <TwilioAgentPanel />;
+      case TabListValues.TWILIO_VOICE:
+        return (
+          <React.Suspense fallback={<Spinner label="Loading voice…" />}>
+            <TwilioVoicePanel />
+          </React.Suspense>
+        );
       case TabListValues.APIS:
         return (
           <ApiTable
@@ -342,9 +354,24 @@ const AppContainer = ({ darkMode, onDarkModeToggle }: IAppContainerProps) => {
       }
     >
       <Stack verticalFill style={{ overflow: 'hidden' }}>
-        {/* <Stack.Item>
-          <AppTablist selectedValue={currentTab} onTabSelect={onTabSwitch} />
-        </Stack.Item> */}
+        <Stack.Item>
+          <div style={{ display: 'flex', gap: 8, padding: '8px 12px', borderBottom: '1px solid #eee' }}>
+            <Button
+              size="small"
+              appearance={currentTab === TabListValues.TWILIO_AGENT ? 'primary' : 'subtle'}
+              onClick={() => setCurrentTab(TabListValues.TWILIO_AGENT)}
+            >
+              Chat
+            </Button>
+            <Button
+              size="small"
+              appearance={currentTab === TabListValues.TWILIO_VOICE ? 'primary' : 'subtle'}
+              onClick={() => setCurrentTab(TabListValues.TWILIO_VOICE)}
+            >
+              Voice
+            </Button>
+          </div>
+        </Stack.Item>
         <Stack.Item grow style={{ overflow: 'hidden', height: '100%' }}>
           {renderCurrentTab()}
         </Stack.Item>

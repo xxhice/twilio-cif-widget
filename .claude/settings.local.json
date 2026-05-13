@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Read(//c/Repos/CRM.Services.Analytics.Platform.Copilot/**)",
+      "Read(//c/Repos/CRM.Solutions.ServiceIntelligence/**)",
+      "Bash(xargs grep -l \"IntentAssistRefresh\\\\|onDemandRefresh\\\\|REFRESH_INTENTS\")"
     ]
   }
 }
